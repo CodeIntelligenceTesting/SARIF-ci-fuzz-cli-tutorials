@@ -1,32 +1,93 @@
-# CI Fuzz CLI Tutorials
+## Project Description
 
-This repository contains example projects and tutorials to help you learn how to create your own fuzz tests with CI Fuzz CLI. 
+This is a Bazel project configured with **cifuzz** which includes:
 
-## Tutorials
+- multiple packages
+- two Fuzz Tests
+  - `main/tests:explore_me_fuzz_test`, defined in the same package as the source
+    code
+  - `fuzztests:test_me_fuzz_test`, located in a separated package
 
-You can find the tutorials for the [C/C++](tutorials/c_cpp) and [Java](tutorials/java) projects in our official documentation:
+## Run
 
-* [C++](https://docs.code-intelligence.com/get-started/find-your-first-bug/cpp) 
-* [Java](https://docs.code-intelligence.com/get-started/find-your-first-bug/java)
+### Heap Buffer Overflow and Undefined Behaviour
 
-## Example projects
+```
+cifuzz run main/tests:explore_me_fuzz_test
+```
 
-### Simple Setups
-Simple project setups include a minimal project to showcase the CI Fuzz setup with one fuzz test included.
-- [CMake](example-projects/simple-setup/cmake)
-- [Bazel](example-projects/simple-setup/bazel)
-- [Other](example-projects/simple-setup/other)
-- [Maven](example-projects/simple-setup/maven)
-- [Gradle (Java)](example-projects/simple-setup/gradle)
-- [Gradle (Kotlin)](example-projects/simple-setup/gradle-kotlin)
+### Heap Use After Free
 
-Also included are [Gradle](example-projects/simple-setup/gradle-junit-4-and-5) and [Maven](example-projects/simple-setup/maven-junit-4-and-5) projects with both JUnit4 and JUnit5 unit tests, to demonstrate the use of the `junit-vintage-engine` together with fuzz tests.
+```
+cifuzz run fuzztests:test_me_fuzz_test
+```
 
-### Advanced Setups
+## Bundle
 
-Advanced project setups include multiple modules or submodules, dependent on the build system with one or more fuzz tests.
-- [CMake](example-projects/advanced-setup/cmake)
-- [Bazel](example-projects/advanced-setup/bazel)
-- [Other](example-projects/advanced-setup/other)
-- [Maven](example-projects/advanced-setup/maven)
-- [Gradle](example-projects/advanced-setup/gradle)
+### explore_me_fuzz_test
+
+```
+cifuzz bundle main/tests:explore_me_fuzz_test
+```
+
+The bundle should include **1** Fuzz Test with **2** targets to cover fuzzing 
+and coverage builds:
+
+```
+...
+target: main/tests/explore_me_fuzz_test
+path: libfuzzer/address+undefined/main/tests/explore_me_fuzz_test/bin/explore_me_fuzz_test
+...
+target: main/tests/explore_me_fuzz_test
+path: replayer/coverage/main/tests/explore_me_fuzz_test/bin/explore_me_fuzz_test
+```
+
+### test_me_fuzz_test
+
+```
+cifuzz bundle
+```
+
+The bundle should include **1** Fuzz Test with **2** targets to cover fuzzing 
+and coverage builds:
+
+```
+...
+target: fuzztests/test_me_fuzz_test
+path: libfuzzer/address+undefined/fuzztests/test_me_fuzz_test/bin/test_me_fuzz_test
+...
+target: fuzztests/test_me_fuzz_test
+path: replayer/coverage/fuzztests/test_me_fuzz_test/bin/test_me_fuzz_test
+...
+```
+
+## Coverage
+
+### explore_me_fuzz_test
+
+```
+cifuzz coverage main/tests:explore_me_fuzz_test
+```
+
+```
+                               File | Functions Hit/Found |  Lines Hit/Found | Branches Hit/Found
+            main/src/explore_me.cpp |      1 / 1 (100.0%) | 15 / 15 (100.0%) |     8 / 8 (100.0%)
+main/tests/explore_me_fuzz_test.cpp |      2 / 2 (100.0%) |   8 / 8 (100.0%) |     0 / 0 (100.0%)
+                                    |                     |                  |
+                                    | Functions Hit/Found |  Lines Hit/Found | Branches Hit/Found
+                              Total |               3 / 3 |          23 / 23 |              8 / 8
+```
+
+### test_me_fuzz_test
+
+```
+cifuzz coverage fuzztests:test_me_fuzz_test
+```
+
+```
+                           File | Functions Hit/Found | Lines Hit/Found | Branches Hit/Found
+fuzztests/test_me_fuzz_test.cpp |      2 / 2 (100.0%) |  6 / 6 (100.0%) |     0 / 0 (100.0%)
+                                |                     |                 |
+                                | Functions Hit/Found | Lines Hit/Found | Branches Hit/Found
+                          Total |               2 / 2 |           6 / 6 |              0 / 0
+```

@@ -1,6 +1,0 @@
-/bazel-*
-*_inputs
-.*_cifuzz_corpus/
-/.cifuzz-*/
-/.ijwb/
-/.clwb/
