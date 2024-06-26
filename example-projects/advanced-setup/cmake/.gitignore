@@ -1,5 +1,0 @@
-build/
-.cifuzz-*/
-*_inputs
-crash-*
-gotest.log
